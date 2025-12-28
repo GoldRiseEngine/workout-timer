@@ -1,934 +1,886 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-  <meta http-equiv="Content-Style-Type" content="text/css">
-  <title></title>
-  <meta name="Generator" content="Cocoa HTML Writer">
-  <meta name="CocoaVersion" content="2685.3">
-  <style type="text/css">
-    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
-    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
-  </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Workout Timer</title>
 </head>
 <body>
-<p class="p1">&lt;!DOCTYPE html&gt;</p>
-<p class="p1">&lt;html lang="en"&gt;</p>
-<p class="p1">&lt;head&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;meta charset="UTF-8"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;title&gt;Workout Timer&lt;/title&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;style&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>* {</p>
-<p class="p1"><span class="Apple-converted-space">      </span>margin: 0;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>padding: 0;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>box-sizing: border-box;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>}</p>
-<p class="p1"><span class="Apple-converted-space">    </span>body {</p>
-<p class="p1"><span class="Apple-converted-space">      </span>font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>}</p>
-<p class="p1"><span class="Apple-converted-space">    </span>#root {</p>
-<p class="p1"><span class="Apple-converted-space">      </span>width: 100%;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>height: 100vh;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>}</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;/style&gt;</p>
-<p class="p1">&lt;/head&gt;</p>
-<p class="p1">&lt;body&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;div id="root"&gt;&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"&gt;&lt;/script&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"&gt;&lt;/script&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;script crossorigin src="https://unpkg.com/@babel/standalone/babel.min.js"&gt;&lt;/script&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;script type="text/babel"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>const { useState, useEffect, useRef } = React;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>const WorkoutTimer = () =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">      </span>const [numExercises, setNumExercises] = useState(8);</p>
-<p class="p1"><span class="Apple-converted-space">      </span>const [setsPerExercise, setSetsPerExercise] = useState(3);</p>
-<p class="p1"><span class="Apple-converted-space">      </span>const [workTime, setWorkTime] = useState(50);</p>
-<p class="p1"><span class="Apple-converted-space">      </span>const [restTime, setRestTime] = useState(75);</p>
-<p class="p1"><span class="Apple-converted-space">      </span>const [isConfigured, setIsConfigured] = useState(false);</p>
-<p class="p2"><span class="Apple-converted-space">      </span></p>
-<p class="p1"><span class="Apple-converted-space">      </span>const [currentExercise, setCurrentExercise] = useState(1);</p>
-<p class="p1"><span class="Apple-converted-space">      </span>const [currentSet, setCurrentSet] = useState(1);</p>
-<p class="p1"><span class="Apple-converted-space">      </span>const [timeRemaining, setTimeRemaining] = useState(0);</p>
-<p class="p1"><span class="Apple-converted-space">      </span>const [isResting, setIsResting] = useState(false);</p>
-<p class="p1"><span class="Apple-converted-space">      </span>const [isRunning, setIsRunning] = useState(false);</p>
-<p class="p1"><span class="Apple-converted-space">      </span>const [isComplete, setIsComplete] = useState(false);</p>
-<p class="p1"><span class="Apple-converted-space">      </span>const audioContextRef = useRef(null);</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">      </span>useEffect(() =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">        </span>audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();</p>
-<p class="p1"><span class="Apple-converted-space">        </span>return () =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">          </span>if (audioContextRef.current) {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>audioContextRef.current.close();</p>
-<p class="p1"><span class="Apple-converted-space">          </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>};</p>
-<p class="p1"><span class="Apple-converted-space">      </span>}, []);</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">      </span>const playSound = (frequency, duration = 0.15) =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">        </span>if (!audioContextRef.current) return;</p>
-<p class="p2"><span class="Apple-converted-space">        </span></p>
-<p class="p1"><span class="Apple-converted-space">        </span>const oscillator = audioContextRef.current.createOscillator();</p>
-<p class="p1"><span class="Apple-converted-space">        </span>const gainNode = audioContextRef.current.createGain();</p>
-<p class="p2"><span class="Apple-converted-space">        </span></p>
-<p class="p1"><span class="Apple-converted-space">        </span>oscillator.connect(gainNode);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>gainNode.connect(audioContextRef.current.destination);</p>
-<p class="p2"><span class="Apple-converted-space">        </span></p>
-<p class="p1"><span class="Apple-converted-space">        </span>oscillator.frequency.value = frequency;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>oscillator.type = 'sine';</p>
-<p class="p2"><span class="Apple-converted-space">        </span></p>
-<p class="p1"><span class="Apple-converted-space">        </span>gainNode.gain.setValueAtTime(0.3, audioContextRef.current.currentTime);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>gainNode.gain.exponentialRampToValueAtTime(0.01, audioContextRef.current.currentTime + duration);</p>
-<p class="p2"><span class="Apple-converted-space">        </span></p>
-<p class="p1"><span class="Apple-converted-space">        </span>oscillator.start(audioContextRef.current.currentTime);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>oscillator.stop(audioContextRef.current.currentTime + duration);</p>
-<p class="p1"><span class="Apple-converted-space">      </span>};</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">      </span>const playRestSound = () =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">        </span>playSound(440, 0.2);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>setTimeout(() =&gt; playSound(330, 0.3), 150);</p>
-<p class="p1"><span class="Apple-converted-space">      </span>};</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">      </span>const playWorkSound = () =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">        </span>playSound(660, 0.15);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>setTimeout(() =&gt; playSound(880, 0.15), 100);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>setTimeout(() =&gt; playSound(1100, 0.2), 200);</p>
-<p class="p1"><span class="Apple-converted-space">      </span>};</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">      </span>useEffect(() =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">        </span>if (!isRunning || isComplete) return;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>const interval = setInterval(() =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">          </span>setTimeRemaining(prev =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>if (prev &lt;= 1) {</p>
-<p class="p1"><span class="Apple-converted-space">              </span>advanceWorkout();</p>
-<p class="p1"><span class="Apple-converted-space">              </span>return 0;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}</p>
-<p class="p1"><span class="Apple-converted-space">            </span>return prev - 1;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>});</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}, 1000);</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>return () =&gt; clearInterval(interval);</p>
-<p class="p1"><span class="Apple-converted-space">      </span>}, [isRunning, isComplete, currentExercise, currentSet, isResting]);</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">      </span>const advanceWorkout = () =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">        </span>if (isResting) {</p>
-<p class="p1"><span class="Apple-converted-space">          </span>if (currentSet &lt; setsPerExercise) {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>setCurrentSet(prev =&gt; prev + 1);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>setIsResting(false);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>setTimeRemaining(workTime);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>playWorkSound();</p>
-<p class="p1"><span class="Apple-converted-space">          </span>} else {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>if (currentExercise &lt; numExercises) {</p>
-<p class="p1"><span class="Apple-converted-space">              </span>setCurrentExercise(prev =&gt; prev + 1);</p>
-<p class="p1"><span class="Apple-converted-space">              </span>setCurrentSet(1);</p>
-<p class="p1"><span class="Apple-converted-space">              </span>setIsResting(false);</p>
-<p class="p1"><span class="Apple-converted-space">              </span>setTimeRemaining(workTime);</p>
-<p class="p1"><span class="Apple-converted-space">              </span>playWorkSound();</p>
-<p class="p1"><span class="Apple-converted-space">            </span>} else {</p>
-<p class="p1"><span class="Apple-converted-space">              </span>setIsComplete(true);</p>
-<p class="p1"><span class="Apple-converted-space">              </span>setIsRunning(false);</p>
-<p class="p1"><span class="Apple-converted-space">              </span>playWorkSound();</p>
-<p class="p1"><span class="Apple-converted-space">              </span>setTimeout(() =&gt; playWorkSound(), 200);</p>
-<p class="p1"><span class="Apple-converted-space">              </span>setTimeout(() =&gt; playWorkSound(), 400);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}</p>
-<p class="p1"><span class="Apple-converted-space">          </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>} else {</p>
-<p class="p1"><span class="Apple-converted-space">          </span>setIsResting(true);</p>
-<p class="p1"><span class="Apple-converted-space">          </span>setTimeRemaining(restTime);</p>
-<p class="p1"><span class="Apple-converted-space">          </span>playRestSound();</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">      </span>};</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">      </span>const startWorkout = () =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">        </span>setIsConfigured(true);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>setIsRunning(true);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>setCurrentExercise(1);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>setCurrentSet(1);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>setIsResting(false);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>setIsComplete(false);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>setTimeRemaining(workTime);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>playWorkSound();</p>
-<p class="p1"><span class="Apple-converted-space">      </span>};</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">      </span>const pauseWorkout = () =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">        </span>setIsRunning(false);</p>
-<p class="p1"><span class="Apple-converted-space">      </span>};</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">      </span>const resumeWorkout = () =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">        </span>setIsRunning(true);</p>
-<p class="p1"><span class="Apple-converted-space">      </span>};</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">      </span>const resetWorkout = () =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">        </span>setIsRunning(false);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>setIsConfigured(false);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>setCurrentExercise(1);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>setCurrentSet(1);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>setIsResting(false);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>setIsComplete(false);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>setTimeRemaining(0);</p>
-<p class="p1"><span class="Apple-converted-space">      </span>};</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">      </span>const totalSets = numExercises * setsPerExercise;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>const completedSets = (currentExercise - 1) * setsPerExercise + (currentSet - 1) + (isResting ? 1 : 0);</p>
-<p class="p1"><span class="Apple-converted-space">      </span>const progressPercent = (completedSets / totalSets) * 100;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>const totalWorkoutTime = Math.ceil((numExercises * setsPerExercise * (workTime + restTime)) / 60);</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">      </span>const WorkIcon = () =&gt; (</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;svg width="24" height="24" viewBox="0 0 60 60" fill="none"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;path d="M30 10 L50 40 L30 35 L10 40 Z" fill="currentColor"/&gt;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;path d="M30 20 L42 38 L30 35 L18 38 Z" fill="currentColor" opacity="0.6"/&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;/svg&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>);</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">      </span>const RestIcon = () =&gt; (</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;svg width="24" height="24" viewBox="0 0 60 60" fill="none"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;circle cx="30" cy="25" r="6" fill="currentColor"/&gt;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;circle cx="30" cy="25" r="12" fill="none" stroke="currentColor" strokeWidth="2" opacity="0.5"/&gt;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;circle cx="30" cy="25" r="18" fill="none" stroke="currentColor" strokeWidth="2" opacity="0.3"/&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;/svg&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>);</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">      </span>return (</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;div style={{</p>
-<p class="p1"><span class="Apple-converted-space">          </span>minHeight: '100vh',</p>
-<p class="p1"><span class="Apple-converted-space">          </span>background: '#F5EEDC',</p>
-<p class="p1"><span class="Apple-converted-space">          </span>fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",</p>
-<p class="p1"><span class="Apple-converted-space">          </span>color: '#4F091D',</p>
-<p class="p1"><span class="Apple-converted-space">          </span>padding: '0',</p>
-<p class="p1"><span class="Apple-converted-space">          </span>display: 'flex',</p>
-<p class="p1"><span class="Apple-converted-space">          </span>flexDirection: 'column',</p>
-<p class="p1"><span class="Apple-converted-space">          </span>WebkitFontSmoothing: 'antialiased',</p>
-<p class="p1"><span class="Apple-converted-space">          </span>MozOsxFontSmoothing: 'grayscale'</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}}&gt;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&amp;family=Inter:wght@500;600&amp;display=swap" rel="stylesheet" /&gt;</p>
-<p class="p2"><span class="Apple-converted-space">          </span></p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;div style={{</p>
-<p class="p1"><span class="Apple-converted-space">            </span>maxWidth: '600px',</p>
-<p class="p1"><span class="Apple-converted-space">            </span>width: '100%',</p>
-<p class="p1"><span class="Apple-converted-space">            </span>margin: '0 auto',</p>
-<p class="p1"><span class="Apple-converted-space">            </span>padding: '20px',</p>
-<p class="p1"><span class="Apple-converted-space">            </span>paddingBottom: '40px',</p>
-<p class="p1"><span class="Apple-converted-space">            </span>boxSizing: 'border-box'</p>
-<p class="p1"><span class="Apple-converted-space">          </span>}}&gt;</p>
-<p class="p2"><span class="Apple-converted-space">            </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;div style={{</p>
-<p class="p1"><span class="Apple-converted-space">              </span>textAlign: 'center',</p>
-<p class="p1"><span class="Apple-converted-space">              </span>paddingTop: '20px',</p>
-<p class="p1"><span class="Apple-converted-space">              </span>marginBottom: '32px'</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}}&gt;</p>
-<p class="p1"><span class="Apple-converted-space">              </span>&lt;div style={{</p>
-<p class="p1"><span class="Apple-converted-space">                </span>fontSize: '13px',</p>
-<p class="p1"><span class="Apple-converted-space">                </span>fontWeight: '600',</p>
-<p class="p1"><span class="Apple-converted-space">                </span>letterSpacing: '0.15em',</p>
-<p class="p1"><span class="Apple-converted-space">                </span>textTransform: 'uppercase',</p>
-<p class="p1"><span class="Apple-converted-space">                </span>color: '#DD4A4B',</p>
-<p class="p1"><span class="Apple-converted-space">                </span>marginBottom: '8px'</p>
-<p class="p1"><span class="Apple-converted-space">              </span>}}&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>Workout Timer</p>
-<p class="p1"><span class="Apple-converted-space">              </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">              </span>&lt;h1 style={{</p>
-<p class="p1"><span class="Apple-converted-space">                </span>fontSize: '32px',</p>
-<p class="p1"><span class="Apple-converted-space">                </span>fontWeight: '800',</p>
-<p class="p1"><span class="Apple-converted-space">                </span>margin: '0',</p>
-<p class="p1"><span class="Apple-converted-space">                </span>color: '#4F091D',</p>
-<p class="p1"><span class="Apple-converted-space">                </span>letterSpacing: '-0.02em',</p>
-<p class="p1"><span class="Apple-converted-space">                </span>fontFamily: "'Outfit', sans-serif"</p>
-<p class="p1"><span class="Apple-converted-space">              </span>}}&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>{isConfigured ? (isComplete ? 'Complete' : isRunning ? 'Active' : 'Paused') : 'Settings'}</p>
-<p class="p1"><span class="Apple-converted-space">              </span>&lt;/h1&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>{!isConfigured &amp;&amp; (</p>
-<p class="p1"><span class="Apple-converted-space">              </span>&lt;div style={{ animation: 'fadeIn 0.3s ease-in' }}&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;div style={{</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>background: '#97BFB4',</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>borderRadius: '16px',</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>padding: '20px',</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>marginBottom: '16px'</p>
-<p class="p1"><span class="Apple-converted-space">                </span>}}&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>&lt;div style={{</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>fontSize: '11px',</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>fontWeight: '600',</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>color: '#4F091D',</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>letterSpacing: '0.05em',</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>textTransform: 'uppercase',</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>marginBottom: '16px',</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>textAlign: 'center'</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>}}&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>Exercises</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>&lt;div style={{</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>display: 'flex',</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>alignItems: 'center',</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>justifyContent: 'space-between',</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>gap: '16px'</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>}}&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;button</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>onClick={() =&gt; setNumExercises(Math.max(1, numExercises - 1))}</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>style={{</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>width: '48px',</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>height: '48px',</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>border: 'none',</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>borderRadius: '12px',</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>fontSize: '24px',</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>fontWeight: '700',</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>cursor: 'pointer',</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>background: 'rgba(221, 74, 75, 0.2)',</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>color: '#DD4A4B',</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>fontFamily: "'Outfit', sans-serif"</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>}}</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>−</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div style={{</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>flex: 1,</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>textAlign: 'center',</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>fontSize: '48px',</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>fontWeight: '800',</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>fontFamily: "'Outfit', sans-serif",</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>color: '#4F091D'</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>}}&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>{numExercises}</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;button</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>onClick={() =&gt; setNumExercises(Math.min(20, numExercises + 1))}</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>style={{</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>width: '48px',</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>height: '48px',</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>border: 'none',</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>borderRadius: '12px',</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>fontSize: '24px',</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>fontWeight: '700',</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>cursor: 'pointer',</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>background: '#DD4A4B',</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>color: 'white',</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>fontFamily: "'Outfit', sans-serif"</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>}}</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>+</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;div style={{</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>background: '#97BFB4',</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>borderRadius: '16px',</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>padding: '20px',</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>marginBottom: '16px'</p>
-<p class="p1"><span class="Apple-converted-space">                </span>}}&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>&lt;div style={{</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>fontSize: '11px',</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>fontWeight: '600',</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>color: '#4F091D',</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>letterSpacing: '0.05em',</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>textTransform: 'uppercase',</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>marginBottom: '16px',</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>textAlign: 'center'</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>}}&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>Sets per Exercise</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>&lt;div style={{</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>display: 'flex',</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>alignItems: 'center',</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>justifyContent: 'space-between',</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>gap: '16px'</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>}}&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;button</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>onClick={() =&gt; setSetsPerExercise(Math.max(1, setsPerExercise - 1))}</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>style={{</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>width: '48px',</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>height: '48px',</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>border: 'none',</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>borderRadius: '12px',</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>fontSize: '24px',</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>fontWeight: '700',</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>cursor: 'pointer',</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>background: 'rgba(221, 74, 75, 0.2)',</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>color: '#DD4A4B',</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>fontFamily: "'Outfit', sans-serif"</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>}}</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>−</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div style={{</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>flex: 1,</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>textAlign: 'center',</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>fontSize: '48px',</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>fontWeight: '800',</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>fontFamily: "'Outfit', sans-serif",</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>color: '#4F091D'</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>}}&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>{setsPerExercise}</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;button</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>onClick={() =&gt; setSetsPerExercise(Math.min(10, setsPerExercise + 1))}</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>style={{</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>width: '48px',</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>height: '48px',</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>border: 'none',</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>borderRadius: '12px',</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>fontSize: '24px',</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>fontWeight: '700',</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>cursor: 'pointer',</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>background: '#DD4A4B',</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>color: 'white',</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>fontFamily: "'Outfit', sans-serif"</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>}}</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>+</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;div style={{</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>display: 'grid',</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>gridTemplateColumns: '1fr 1fr',</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>gap: '16px',</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>marginBottom: '24px'</p>
-<p class="p1"><span class="Apple-converted-space">                </span>}}&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>&lt;div style={{</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>background: '#97BFB4',</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>borderRadius: '16px',</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>padding: '20px'</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>}}&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div style={{</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>fontSize: '11px',</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>fontWeight: '600',</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>color: '#4F091D',</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>letterSpacing: '0.05em',</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>textTransform: 'uppercase',</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>marginBottom: '16px',</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>textAlign: 'center'</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>}}&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>Work (sec)</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div style={{</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>display: 'flex',</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>flexDirection: 'column',</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>gap: '12px'</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>}}&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>&lt;button</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>onClick={() =&gt; setWorkTime(Math.min(180, workTime + 5))}</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>style={{</p>
-<p class="p1"><span class="Apple-converted-space">                          </span>width: '100%',</p>
-<p class="p1"><span class="Apple-converted-space">                          </span>height: '40px',</p>
-<p class="p1"><span class="Apple-converted-space">                          </span>border: 'none',</p>
-<p class="p1"><span class="Apple-converted-space">                          </span>borderRadius: '12px',</p>
-<p class="p1"><span class="Apple-converted-space">                          </span>fontSize: '20px',</p>
-<p class="p1"><span class="Apple-converted-space">                          </span>fontWeight: '700',</p>
-<p class="p1"><span class="Apple-converted-space">                          </span>cursor: 'pointer',</p>
-<p class="p1"><span class="Apple-converted-space">                          </span>background: '#DD4A4B',</p>
-<p class="p1"><span class="Apple-converted-space">                          </span>color: 'white',</p>
-<p class="p1"><span class="Apple-converted-space">                          </span>fontFamily: "'Outfit', sans-serif"</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>}}</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>+</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>&lt;div style={{</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>textAlign: 'center',</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>fontSize: '36px',</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>fontWeight: '800',</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>fontFamily: "'Outfit', sans-serif",</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>color: '#4F091D'</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>}}&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>{workTime}</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>&lt;button</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>onClick={() =&gt; setWorkTime(Math.max(10, workTime - 5))}</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>style={{</p>
-<p class="p1"><span class="Apple-converted-space">                          </span>width: '100%',</p>
-<p class="p1"><span class="Apple-converted-space">                          </span>height: '40px',</p>
-<p class="p1"><span class="Apple-converted-space">                          </span>border: 'none',</p>
-<p class="p1"><span class="Apple-converted-space">                          </span>borderRadius: '12px',</p>
-<p class="p1"><span class="Apple-converted-space">                          </span>fontSize: '20px',</p>
-<p class="p1"><span class="Apple-converted-space">                          </span>fontWeight: '700',</p>
-<p class="p1"><span class="Apple-converted-space">                          </span>cursor: 'pointer',</p>
-<p class="p1"><span class="Apple-converted-space">                          </span>background: 'rgba(221, 74, 75, 0.2)',</p>
-<p class="p1"><span class="Apple-converted-space">                          </span>color: '#DD4A4B',</p>
-<p class="p1"><span class="Apple-converted-space">                          </span>fontFamily: "'Outfit', sans-serif"</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>}}</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>−</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">                  </span>&lt;div style={{</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>background: '#97BFB4',</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>borderRadius: '16px',</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>padding: '20px'</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>}}&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div style={{</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>fontSize: '11px',</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>fontWeight: '600',</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>color: '#4F091D',</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>letterSpacing: '0.05em',</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>textTransform: 'uppercase',</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>marginBottom: '16px',</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>textAlign: 'center'</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>}}&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>Rest (sec)</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div style={{</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>display: 'flex',</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>flexDirection: 'column',</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>gap: '12px'</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>}}&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>&lt;button</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>onClick={() =&gt; setRestTime(Math.min(300, restTime + 5))}</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>style={{</p>
-<p class="p1"><span class="Apple-converted-space">                          </span>width: '100%',</p>
-<p class="p1"><span class="Apple-converted-space">                          </span>height: '40px',</p>
-<p class="p1"><span class="Apple-converted-space">                          </span>border: 'none',</p>
-<p class="p1"><span class="Apple-converted-space">                          </span>borderRadius: '12px',</p>
-<p class="p1"><span class="Apple-converted-space">                          </span>fontSize: '20px',</p>
-<p class="p1"><span class="Apple-converted-space">                          </span>fontWeight: '700',</p>
-<p class="p1"><span class="Apple-converted-space">                          </span>cursor: 'pointer',</p>
-<p class="p1"><span class="Apple-converted-space">                          </span>background: '#DD4A4B',</p>
-<p class="p1"><span class="Apple-converted-space">                          </span>color: 'white',</p>
-<p class="p1"><span class="Apple-converted-space">                          </span>fontFamily: "'Outfit', sans-serif"</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>}}</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>+</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>&lt;div style={{</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>textAlign: 'center',</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>fontSize: '36px',</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>fontWeight: '800',</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>fontFamily: "'Outfit', sans-serif",</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>color: '#4F091D'</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>}}&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>{restTime}</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>&lt;button</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>onClick={() =&gt; setRestTime(Math.max(10, restTime - 5))}</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>style={{</p>
-<p class="p1"><span class="Apple-converted-space">                          </span>width: '100%',</p>
-<p class="p1"><span class="Apple-converted-space">                          </span>height: '40px',</p>
-<p class="p1"><span class="Apple-converted-space">                          </span>border: 'none',</p>
-<p class="p1"><span class="Apple-converted-space">                          </span>borderRadius: '12px',</p>
-<p class="p1"><span class="Apple-converted-space">                          </span>fontSize: '20px',</p>
-<p class="p1"><span class="Apple-converted-space">                          </span>fontWeight: '700',</p>
-<p class="p1"><span class="Apple-converted-space">                          </span>cursor: 'pointer',</p>
-<p class="p1"><span class="Apple-converted-space">                          </span>background: 'rgba(221, 74, 75, 0.2)',</p>
-<p class="p1"><span class="Apple-converted-space">                          </span>color: '#DD4A4B',</p>
-<p class="p1"><span class="Apple-converted-space">                          </span>fontFamily: "'Outfit', sans-serif"</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>}}</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>−</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;div style={{</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>background: '#97BFB4',</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>borderRadius: '16px',</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>padding: '24px',</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>marginBottom: '24px'</p>
-<p class="p1"><span class="Apple-converted-space">                </span>}}&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>&lt;div style={{</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>display: 'flex',</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>justifyContent: 'space-between',</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>alignItems: 'center'</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>}}&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>&lt;div style={{</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>fontSize: '11px',</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>fontWeight: '600',</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>color: '#4F091D',</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>letterSpacing: '0.05em',</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>textTransform: 'uppercase',</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>marginBottom: '4px'</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>}}&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>Total Sets</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>&lt;div style={{</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>fontSize: '28px',</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>fontWeight: '800',</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>fontFamily: "'Outfit', sans-serif",</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>color: '#4F091D'</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>}}&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>{totalSets}</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div style={{ textAlign: 'right' }}&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>&lt;div style={{</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>fontSize: '11px',</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>fontWeight: '600',</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>color: '#4F091D',</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>letterSpacing: '0.05em',</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>textTransform: 'uppercase',</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>marginBottom: '4px'</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>}}&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>Duration</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>&lt;div style={{</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>fontSize: '28px',</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>fontWeight: '800',</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>fontFamily: "'Outfit', sans-serif",</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>color: '#4F091D'</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>}}&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>~{totalWorkoutTime}m</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;button</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>onClick={startWorkout}</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>style={{</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>width: '100%',</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>background: '#DD4A4B',</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>border: 'none',</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>borderRadius: '12px',</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>padding: '20px',</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>fontSize: '16px',</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>fontWeight: '700',</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>color: 'white',</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>cursor: 'pointer',</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>letterSpacing: '0.05em',</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>textTransform: 'uppercase',</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>fontFamily: "'Outfit', sans-serif",</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>display: 'flex',</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>alignItems: 'center',</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>justifyContent: 'center',</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>gap: '8px'</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>}}</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>&lt;WorkIcon /&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>Start</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">              </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>)}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>{isConfigured &amp;&amp; !isComplete &amp;&amp; isRunning &amp;&amp; (</p>
-<p class="p1"><span class="Apple-converted-space">              </span>&lt;div style={{ animation: 'fadeIn 0.3s ease-in' }}&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;div style={{</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>textAlign: 'center',</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>marginBottom: '32px'</p>
-<p class="p1"><span class="Apple-converted-space">                </span>}}&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>&lt;div style={{</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>display: 'inline-flex',</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>alignItems: 'center',</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>gap: '12px',</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>padding: '14px 28px',</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>borderRadius: '50px',</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>fontSize: '15px',</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>fontWeight: '600',</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>letterSpacing: '0.05em',</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>textTransform: 'uppercase',</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>background: isResting ? 'transparent' : '#DD4A4B',</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>border: isResting ? '2px solid #97BFB4' : 'none',</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>color: isResting ? '#97BFB4' : 'white',</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>animation: 'pulse 2s ease-in-out infinite'</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>}}&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>{isResting ? &lt;RestIcon /&gt; : &lt;WorkIcon /&gt;}</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>{isResting ? 'Rest' : 'Work'}</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;div style={{</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>background: '#97BFB4',</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>borderRadius: '20px',</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>padding: '48px 24px',</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>textAlign: 'center',</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>marginBottom: '24px'</p>
-<p class="p1"><span class="Apple-converted-space">                </span>}}&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>&lt;div style={{</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>fontSize: '96px',</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>fontWeight: '800',</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>lineHeight: 1,</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>fontFamily: "'Outfit', sans-serif",</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>color: '#DD4A4B',</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>marginBottom: '12px'</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>}}&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>{timeRemaining}</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>&lt;div style={{</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>fontSize: '12px',</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>fontWeight: '600',</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>letterSpacing: '0.1em',</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>textTransform: 'uppercase',</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>color: '#4F091D'</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>}}&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>Seconds</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;div style={{</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>background: '#97BFB4',</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>borderRadius: '16px',</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>padding: '24px',</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>marginBottom: '24px'</p>
-<p class="p1"><span class="Apple-converted-space">                </span>}}&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>&lt;div style={{</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>display: 'flex',</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>justifyContent: 'space-between',</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>alignItems: 'center',</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>marginBottom: '16px'</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>}}&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>&lt;div style={{</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>fontSize: '11px',</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>fontWeight: '600',</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>color: '#4F091D',</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>letterSpacing: '0.05em',</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>textTransform: 'uppercase',</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>marginBottom: '4px'</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>}}&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>Exercise</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>&lt;div style={{</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>fontSize: '24px',</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>fontWeight: '800',</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>fontFamily: "'Outfit', sans-serif",</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>color: '#4F091D'</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>}}&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>{currentExercise}/{numExercises}</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div style={{ textAlign: 'right' }}&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>&lt;div style={{</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>fontSize: '11px',</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>fontWeight: '600',</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>color: '#4F091D',</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>letterSpacing: '0.05em',</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>textTransform: 'uppercase',</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>marginBottom: '4px'</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>}}&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>Set</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>&lt;div style={{</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>fontSize: '24px',</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>fontWeight: '800',</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>fontFamily: "'Outfit', sans-serif",</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>color: '#4F091D'</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>}}&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>{currentSet}/{setsPerExercise}</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">                  </span>&lt;div style={{</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>background: 'rgba(79, 9, 29, 0.2)',</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>borderRadius: '50px',</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>height: '8px',</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>overflow: 'hidden',</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>marginBottom: '8px'</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>}}&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div style={{</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>background: '#DD4A4B',</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>height: '100%',</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>width: `${progressPercent}%`,</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>transition: 'width 0.5s ease',</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>borderRadius: '50px'</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>}}/&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>&lt;div style={{</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>fontSize: '11px',</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>fontWeight: '600',</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>color: '#4F091D',</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>textAlign: 'center',</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>fontFamily: "'Outfit', sans-serif"</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>}}&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>{Math.round(progressPercent)}% Complete</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;div style={{</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>display: 'grid',</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>gridTemplateColumns: '1fr 1fr',</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>gap: '12px'</p>
-<p class="p1"><span class="Apple-converted-space">                </span>}}&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>&lt;button</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>onClick={pauseWorkout}</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>style={{</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>background: 'transparent',</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>border: '2px solid #97BFB4',</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>borderRadius: '12px',</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>padding: '18px',</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>fontSize: '15px',</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>fontWeight: '600',</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>color: '#4F091D',</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>cursor: 'pointer',</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>fontFamily: "'Inter', sans-serif"</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>}}</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>❚❚ Pause</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>&lt;button</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>onClick={resetWorkout}</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>style={{</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>background: 'transparent',</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>border: '2px solid #97BFB4',</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>borderRadius: '12px',</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>padding: '18px',</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>fontSize: '15px',</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>fontWeight: '600',</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>color: '#4F091D',</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>cursor: 'pointer',</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>fontFamily: "'Inter', sans-serif"</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>}}</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>↻ Reset</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">              </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>)}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>{isConfigured &amp;&amp; !isRunning &amp;&amp; !isComplete &amp;&amp; timeRemaining &gt; 0 &amp;&amp; (</p>
-<p class="p1"><span class="Apple-converted-space">              </span>&lt;div style={{</p>
-<p class="p1"><span class="Apple-converted-space">                </span>animation: 'fadeIn 0.3s ease-in',</p>
-<p class="p1"><span class="Apple-converted-space">                </span>textAlign: 'center'</p>
-<p class="p1"><span class="Apple-converted-space">              </span>}}&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;div style={{</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>fontSize: '64px',</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>marginBottom: '24px'</p>
-<p class="p1"><span class="Apple-converted-space">                </span>}}&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>⏸</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;h2 style={{</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>fontSize: '28px',</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>fontWeight: '700',</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>marginBottom: '12px',</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>color: '#4F091D',</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>fontFamily: "'Outfit', sans-serif"</p>
-<p class="p1"><span class="Apple-converted-space">                </span>}}&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>Paused</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;/h2&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;p style={{</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>color: '#4F091D',</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>fontSize: '15px',</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>fontWeight: '500',</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>marginBottom: '32px',</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>fontFamily: "'Outfit', sans-serif",</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>opacity: 0.7</p>
-<p class="p1"><span class="Apple-converted-space">                </span>}}&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>Exercise {currentExercise} • Set {currentSet} • {timeRemaining}s</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;/p&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;div style={{</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>display: 'grid',</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>gridTemplateColumns: '1fr 1fr',</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>gap: '12px'</p>
-<p class="p1"><span class="Apple-converted-space">                </span>}}&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>&lt;button</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>onClick={resumeWorkout}</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>style={{</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>background: '#DD4A4B',</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>border: 'none',</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>borderRadius: '12px',</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>padding: '18px',</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>fontSize: '16px',</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>fontWeight: '600',</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>color: 'white',</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>cursor: 'pointer',</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>fontFamily: "'Outfit', sans-serif"</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>}}</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>▶ Resume</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>&lt;button</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>onClick={resetWorkout}</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>style={{</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>background: 'transparent',</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>border: '2px solid #97BFB4',</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>borderRadius: '12px',</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>padding: '18px',</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>fontSize: '16px',</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>fontWeight: '600',</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>color: '#4F091D',</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>cursor: 'pointer',</p>
-<p class="p1"><span class="Apple-converted-space">                      </span>fontFamily: "'Outfit', sans-serif"</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>}}</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>🔄 Reset</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">              </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>)}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>{isComplete &amp;&amp; (</p>
-<p class="p1"><span class="Apple-converted-space">              </span>&lt;div style={{</p>
-<p class="p1"><span class="Apple-converted-space">                </span>animation: 'fadeIn 0.3s ease-in',</p>
-<p class="p1"><span class="Apple-converted-space">                </span>textAlign: 'center'</p>
-<p class="p1"><span class="Apple-converted-space">              </span>}}&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;div style={{</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>fontSize: '96px',</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>marginBottom: '24px',</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>animation: 'bounce 1s ease-in-out'</p>
-<p class="p1"><span class="Apple-converted-space">                </span>}}&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>✓</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;h2 style={{</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>fontSize: '32px',</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>fontWeight: '800',</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>marginBottom: '12px',</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>color: '#97BFB4',</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>fontFamily: "'Outfit', sans-serif"</p>
-<p class="p1"><span class="Apple-converted-space">                </span>}}&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>Workout Complete!</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;/h2&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;p style={{</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>color: '#4F091D',</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>fontSize: '15px',</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>fontWeight: '500',</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>marginBottom: '32px',</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>fontFamily: "'Outfit', sans-serif",</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>opacity: 0.7</p>
-<p class="p1"><span class="Apple-converted-space">                </span>}}&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>{numExercises} exercises • {totalSets} sets</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;/p&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;button</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>onClick={resetWorkout}</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>style={{</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>width: '100%',</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>background: '#DD4A4B',</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>border: 'none',</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>borderRadius: '12px',</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>padding: '20px',</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>fontSize: '17px',</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>fontWeight: '700',</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>color: 'white',</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>cursor: 'pointer',</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>letterSpacing: '0.02em',</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>textTransform: 'uppercase',</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>fontFamily: "'Outfit', sans-serif"</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>}}</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                  </span>New Workout</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">              </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>)}</p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;style&gt;{`</p>
-<p class="p1"><span class="Apple-converted-space">            </span>@keyframes fadeIn {</p>
-<p class="p1"><span class="Apple-converted-space">              </span>from { opacity: 0; transform: translateY(10px); }</p>
-<p class="p1"><span class="Apple-converted-space">              </span>to { opacity: 1; transform: translateY(0); }</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}</p>
-<p class="p2"><span class="Apple-converted-space">            </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>@keyframes pulse {</p>
-<p class="p1"><span class="Apple-converted-space">              </span>0%, 100% { opacity: 1; }</p>
-<p class="p1"><span class="Apple-converted-space">              </span>50% { opacity: 0.85; }</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}</p>
-<p class="p2"><span class="Apple-converted-space">            </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>@keyframes bounce {</p>
-<p class="p1"><span class="Apple-converted-space">              </span>0%, 100% { transform: scale(1); }</p>
-<p class="p1"><span class="Apple-converted-space">              </span>50% { transform: scale(1.1); }</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}</p>
-<p class="p1"><span class="Apple-converted-space">          </span>`}&lt;/style&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>);</p>
-<p class="p1"><span class="Apple-converted-space">    </span>};</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>const root = ReactDOM.createRoot(document.getElementById('root'));</p>
-<p class="p1"><span class="Apple-converted-space">    </span>root.render(&lt;WorkoutTimer /&gt;);</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;/script&gt;</p>
-<p class="p1">&lt;/body&gt;</p>
-<p class="p1">&lt;/html&gt;</p>
+  <div id="root"></div>
+
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    const WorkoutTimer = () => {
+      const [numExercises, setNumExercises] = useState(8);
+      const [setsPerExercise, setSetsPerExercise] = useState(3);
+      const [workTime, setWorkTime] = useState(50);
+      const [restTime, setRestTime] = useState(75);
+      const [isConfigured, setIsConfigured] = useState(false);
+      
+      const [currentExercise, setCurrentExercise] = useState(1);
+      const [currentSet, setCurrentSet] = useState(1);
+      const [timeRemaining, setTimeRemaining] = useState(0);
+      const [isResting, setIsResting] = useState(false);
+      const [isRunning, setIsRunning] = useState(false);
+      const [isComplete, setIsComplete] = useState(false);
+      const audioContextRef = useRef(null);
+      const lastBeepTime = useRef(0);
+
+      const initAudio = () => {
+        if (!audioContextRef.current) {
+          audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioContextRef.current.state === 'suspended') {
+          audioContextRef.current.resume();
+        }
+      };
+
+      const playSound = (frequency, duration = 0.15) => {
+        if (!audioContextRef.current) return;
+        
+        const oscillator = audioContextRef.current.createOscillator();
+        const gainNode = audioContextRef.current.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContextRef.current.destination);
+        
+        oscillator.frequency.value = frequency;
+        oscillator.type = 'sine';
+        
+        gainNode.gain.setValueAtTime(0.3, audioContextRef.current.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContextRef.current.currentTime + duration);
+        
+        oscillator.start(audioContextRef.current.currentTime);
+        oscillator.stop(audioContextRef.current.currentTime + duration);
+      };
+
+      const playClickSound = () => {
+        initAudio();
+        playSound(800, 0.08);
+      };
+
+      const playRestSound = () => {
+        initAudio();
+        playSound(440, 0.2);
+        setTimeout(() => playSound(330, 0.3), 150);
+      };
+
+      const playWorkSound = () => {
+        initAudio();
+        playSound(660, 0.15);
+        setTimeout(() => playSound(880, 0.15), 100);
+        setTimeout(() => playSound(1100, 0.2), 200);
+      };
+
+      useEffect(() => {
+        if (isRunning && timeRemaining <= 7 && timeRemaining > 0) {
+          if (lastBeepTime.current !== timeRemaining) {
+            playClickSound();
+            lastBeepTime.current = timeRemaining;
+          }
+        }
+      }, [timeRemaining, isRunning]);
+
+      useEffect(() => {
+        if (!isRunning || isComplete) return;
+
+        const interval = setInterval(() => {
+          setTimeRemaining(prev => {
+            if (prev <= 1) {
+              advanceWorkout();
+              return 0;
+            }
+            return prev - 1;
+          });
+        }, 1000);
+
+        return () => clearInterval(interval);
+      }, [isRunning, isComplete, currentExercise, currentSet, isResting]);
+
+      const advanceWorkout = () => {
+        if (isResting) {
+          if (currentSet < setsPerExercise) {
+            setCurrentSet(prev => prev + 1);
+            setIsResting(false);
+            setTimeRemaining(workTime);
+            playWorkSound();
+          } else {
+            if (currentExercise < numExercises) {
+              setCurrentExercise(prev => prev + 1);
+              setCurrentSet(1);
+              setIsResting(false);
+              setTimeRemaining(workTime);
+              playWorkSound();
+            } else {
+              setIsComplete(true);
+              setIsRunning(false);
+              playWorkSound();
+              setTimeout(() => playWorkSound(), 200);
+              setTimeout(() => playWorkSound(), 400);
+            }
+          }
+        } else {
+          setIsResting(true);
+          setTimeRemaining(restTime);
+          playRestSound();
+        }
+      };
+
+      const startWorkout = () => {
+        initAudio();
+        setIsConfigured(true);
+        setIsRunning(true);
+        setCurrentExercise(1);
+        setCurrentSet(1);
+        setIsResting(false);
+        setIsComplete(false);
+        setTimeRemaining(workTime);
+        playWorkSound();
+      };
+
+      const pauseWorkout = () => {
+        setIsRunning(false);
+        playRestSound();
+      };
+
+      const resumeWorkout = () => {
+        setIsRunning(true);
+        playWorkSound();
+      };
+
+      const resetWorkout = () => {
+        setIsRunning(false);
+        setIsConfigured(false);
+        setCurrentExercise(1);
+        setCurrentSet(1);
+        setIsResting(false);
+        setIsComplete(false);
+        setTimeRemaining(0);
+      };
+
+      const totalSets = numExercises * setsPerExercise;
+      const completedSets = (currentExercise - 1) * setsPerExercise + (currentSet - 1) + (isResting ? 1 : 0);
+      const progressPercent = (completedSets / totalSets) * 100;
+      const totalWorkoutTime = Math.ceil((numExercises * setsPerExercise * (workTime + restTime)) / 60);
+
+      const WorkIcon = () => (
+        <svg width="24" height="24" viewBox="0 0 60 60" fill="none">
+          <path d="M30 10 L50 40 L30 35 L10 40 Z" fill="currentColor"/>
+          <path d="M30 20 L42 38 L30 35 L18 38 Z" fill="currentColor" opacity="0.6"/>
+        </svg>
+      );
+
+      const RestIcon = () => (
+        <svg width="24" height="24" viewBox="0 0 60 60" fill="none">
+          <circle cx="30" cy="25" r="6" fill="currentColor"/>
+          <circle cx="30" cy="25" r="12" fill="none" stroke="currentColor" strokeWidth="2" opacity="0.5"/>
+          <circle cx="30" cy="25" r="18" fill="none" stroke="currentColor" strokeWidth="2" opacity="0.3"/>
+        </svg>
+      );
+
+      const PlayIcon = () => (
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <path d="M8 5v14l11-7L8 5z" fill="currentColor"/>
+        </svg>
+      );
+
+      const ResetIcon = () => (
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z" fill="currentColor"/>
+        </svg>
+      );
+
+      return (
+        <div style={{
+          minHeight: '100vh',
+          background: '#F5EEDC',
+          fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+          color: '#7A2937',
+          padding: '0',
+          display: 'flex',
+          flexDirection: 'column',
+          WebkitFontSmoothing: 'antialiased',
+          MozOsxFontSmoothing: 'grayscale'
+        }}>
+          <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@500;600&display=swap" rel="stylesheet" />
+          
+          <div style={{
+            maxWidth: '600px',
+            width: '100%',
+            margin: '0 auto',
+            padding: '20px',
+            paddingBottom: '40px',
+            boxSizing: 'border-box'
+          }}>
+            
+            <div style={{
+              textAlign: 'center',
+              paddingTop: '20px',
+              marginBottom: '32px'
+            }}>
+              <div style={{
+                fontSize: '32px',
+                fontWeight: '800',
+                letterSpacing: '-0.02em',
+                textTransform: 'uppercase',
+                color: '#7A2937',
+                marginBottom: '8px',
+                fontFamily: "'Outfit', sans-serif"
+              }}>
+                NIEM TIME
+              </div>
+              <h1 style={{
+                fontSize: '13px',
+                fontWeight: '600',
+                margin: '0',
+                color: '#DD4A4B',
+                letterSpacing: '0.15em',
+                textTransform: 'uppercase',
+                fontFamily: "'Outfit', sans-serif"
+              }}>
+                {isConfigured ? (isComplete ? 'Complete' : 'Active') : 'Settings'}
+              </h1>
+            </div>
+
+            {!isConfigured && (
+              <div>
+                <div style={{
+                  background: '#97BFB4',
+                  borderRadius: '16px',
+                  padding: '20px',
+                  marginBottom: '16px'
+                }}>
+                  <div style={{
+                    fontSize: '11px',
+                    fontWeight: '600',
+                    color: '#7A2937',
+                    letterSpacing: '0.05em',
+                    textTransform: 'uppercase',
+                    marginBottom: '16px',
+                    textAlign: 'center'
+                  }}>
+                    Exercises
+                  </div>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '16px'
+                  }}>
+                    <button
+                      onClick={() => setNumExercises(Math.max(1, numExercises - 1))}
+                      style={{
+                        width: '48px',
+                        height: '48px',
+                        border: 'none',
+                        borderRadius: '12px',
+                        fontSize: '24px',
+                        fontWeight: '700',
+                        cursor: 'pointer',
+                        background: 'rgba(221, 74, 75, 0.2)',
+                        color: '#DD4A4B',
+                        fontFamily: "'Outfit', sans-serif"
+                      }}
+                    >
+                      −
+                    </button>
+                    <div style={{
+                      flex: 1,
+                      textAlign: 'center',
+                      fontSize: '48px',
+                      fontWeight: '800',
+                      fontFamily: "'Outfit', sans-serif",
+                      color: '#7A2937'
+                    }}>
+                      {numExercises}
+                    </div>
+                    <button
+                      onClick={() => setNumExercises(Math.min(20, numExercises + 1))}
+                      style={{
+                        width: '48px',
+                        height: '48px',
+                        border: 'none',
+                        borderRadius: '12px',
+                        fontSize: '24px',
+                        fontWeight: '700',
+                        cursor: 'pointer',
+                        background: '#DD4A4B',
+                        color: 'white',
+                        fontFamily: "'Outfit', sans-serif"
+                      }}
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+
+                <div style={{
+                  background: '#97BFB4',
+                  borderRadius: '16px',
+                  padding: '20px',
+                  marginBottom: '16px'
+                }}>
+                  <div style={{
+                    fontSize: '11px',
+                    fontWeight: '600',
+                    color: '#7A2937',
+                    letterSpacing: '0.05em',
+                    textTransform: 'uppercase',
+                    marginBottom: '16px',
+                    textAlign: 'center'
+                  }}>
+                    Sets per Exercise
+                  </div>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '16px'
+                  }}>
+                    <button
+                      onClick={() => setSetsPerExercise(Math.max(1, setsPerExercise - 1))}
+                      style={{
+                        width: '48px',
+                        height: '48px',
+                        border: 'none',
+                        borderRadius: '12px',
+                        fontSize: '24px',
+                        fontWeight: '700',
+                        cursor: 'pointer',
+                        background: 'rgba(221, 74, 75, 0.2)',
+                        color: '#DD4A4B',
+                        fontFamily: "'Outfit', sans-serif"
+                      }}
+                    >
+                      −
+                    </button>
+                    <div style={{
+                      flex: 1,
+                      textAlign: 'center',
+                      fontSize: '48px',
+                      fontWeight: '800',
+                      fontFamily: "'Outfit', sans-serif",
+                      color: '#7A2937'
+                    }}>
+                      {setsPerExercise}
+                    </div>
+                    <button
+                      onClick={() => setSetsPerExercise(Math.min(10, setsPerExercise + 1))}
+                      style={{
+                        width: '48px',
+                        height: '48px',
+                        border: 'none',
+                        borderRadius: '12px',
+                        fontSize: '24px',
+                        fontWeight: '700',
+                        cursor: 'pointer',
+                        background: '#DD4A4B',
+                        color: 'white',
+                        fontFamily: "'Outfit', sans-serif"
+                      }}
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 1fr',
+                  gap: '16px',
+                  marginBottom: '24px'
+                }}>
+                  <div style={{
+                    background: '#97BFB4',
+                    borderRadius: '16px',
+                    padding: '20px'
+                  }}>
+                    <div style={{
+                      fontSize: '11px',
+                      fontWeight: '600',
+                      color: '#7A2937',
+                      letterSpacing: '0.05em',
+                      textTransform: 'uppercase',
+                      marginBottom: '16px',
+                      textAlign: 'center'
+                    }}>
+                      Work (sec)
+                    </div>
+                    <div style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '12px'
+                    }}>
+                      <button
+                        onClick={() => setWorkTime(Math.min(180, workTime + 5))}
+                        style={{
+                          width: '100%',
+                          height: '40px',
+                          border: 'none',
+                          borderRadius: '12px',
+                          fontSize: '20px',
+                          fontWeight: '700',
+                          cursor: 'pointer',
+                          background: '#DD4A4B',
+                          color: 'white',
+                          fontFamily: "'Outfit', sans-serif"
+                        }}
+                      >
+                        +
+                      </button>
+                      <div style={{
+                        textAlign: 'center',
+                        fontSize: '36px',
+                        fontWeight: '800',
+                        fontFamily: "'Outfit', sans-serif",
+                        color: '#7A2937'
+                      }}>
+                        {workTime}
+                      </div>
+                      <button
+                        onClick={() => setWorkTime(Math.max(10, workTime - 5))}
+                        style={{
+                          width: '100%',
+                          height: '40px',
+                          border: 'none',
+                          borderRadius: '12px',
+                          fontSize: '20px',
+                          fontWeight: '700',
+                          cursor: 'pointer',
+                          background: 'rgba(221, 74, 75, 0.2)',
+                          color: '#DD4A4B',
+                          fontFamily: "'Outfit', sans-serif"
+                        }}
+                      >
+                        −
+                      </button>
+                    </div>
+                  </div>
+
+                  <div style={{
+                    background: '#97BFB4',
+                    borderRadius: '16px',
+                    padding: '20px'
+                  }}>
+                    <div style={{
+                      fontSize: '11px',
+                      fontWeight: '600',
+                      color: '#7A2937',
+                      letterSpacing: '0.05em',
+                      textTransform: 'uppercase',
+                      marginBottom: '16px',
+                      textAlign: 'center'
+                    }}>
+                      Rest (sec)
+                    </div>
+                    <div style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '12px'
+                    }}>
+                      <button
+                        onClick={() => setRestTime(Math.min(300, restTime + 5))}
+                        style={{
+                          width: '100%',
+                          height: '40px',
+                          border: 'none',
+                          borderRadius: '12px',
+                          fontSize: '20px',
+                          fontWeight: '700',
+                          cursor: 'pointer',
+                          background: '#DD4A4B',
+                          color: 'white',
+                          fontFamily: "'Outfit', sans-serif"
+                        }}
+                      >
+                        +
+                      </button>
+                      <div style={{
+                        textAlign: 'center',
+                        fontSize: '36px',
+                        fontWeight: '800',
+                        fontFamily: "'Outfit', sans-serif",
+                        color: '#7A2937'
+                      }}>
+                        {restTime}
+                      </div>
+                      <button
+                        onClick={() => setRestTime(Math.max(10, restTime - 5))}
+                        style={{
+                          width: '100%',
+                          height: '40px',
+                          border: 'none',
+                          borderRadius: '12px',
+                          fontSize: '20px',
+                          fontWeight: '700',
+                          cursor: 'pointer',
+                          background: 'rgba(221, 74, 75, 0.2)',
+                          color: '#DD4A4B',
+                          fontFamily: "'Outfit', sans-serif"
+                        }}
+                      >
+                        −
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{
+                  background: '#97BFB4',
+                  borderRadius: '16px',
+                  padding: '24px',
+                  marginBottom: '24px'
+                }}>
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center'
+                  }}>
+                    <div>
+                      <div style={{
+                        fontSize: '11px',
+                        fontWeight: '600',
+                        color: '#7A2937',
+                        letterSpacing: '0.05em',
+                        textTransform: 'uppercase',
+                        marginBottom: '4px'
+                      }}>
+                        Total Sets
+                      </div>
+                      <div style={{
+                        fontSize: '28px',
+                        fontWeight: '800',
+                        fontFamily: "'Outfit', sans-serif",
+                        color: '#7A2937'
+                      }}>
+                        {totalSets}
+                      </div>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <div style={{
+                        fontSize: '11px',
+                        fontWeight: '600',
+                        color: '#7A2937',
+                        letterSpacing: '0.05em',
+                        textTransform: 'uppercase',
+                        marginBottom: '4px'
+                      }}>
+                        Duration
+                      </div>
+                      <div style={{
+                        fontSize: '28px',
+                        fontWeight: '800',
+                        fontFamily: "'Outfit', sans-serif",
+                        color: '#7A2937'
+                      }}>
+                        ~{totalWorkoutTime}m
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  onClick={startWorkout}
+                  style={{
+                    width: '100%',
+                    background: '#DD4A4B',
+                    border: 'none',
+                    borderRadius: '12px',
+                    padding: '20px',
+                    fontSize: '16px',
+                    fontWeight: '700',
+                    color: 'white',
+                    cursor: 'pointer',
+                    letterSpacing: '0.05em',
+                    textTransform: 'uppercase',
+                    fontFamily: "'Outfit', sans-serif",
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px'
+                  }}
+                >
+                  <WorkIcon />
+                  Start
+                </button>
+              </div>
+            )}
+
+            {isConfigured && !isComplete && (
+              <div>
+                <div style={{
+                  textAlign: 'center',
+                  marginBottom: '32px'
+                }}>
+                  <div style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                    padding: '14px 28px',
+                    borderRadius: '50px',
+                    fontSize: '15px',
+                    fontWeight: '600',
+                    letterSpacing: '0.05em',
+                    textTransform: 'uppercase',
+                    background: isResting ? 'transparent' : '#DD4A4B',
+                    border: isResting ? '2px solid #97BFB4' : 'none',
+                    color: isResting ? '#97BFB4' : 'white',
+                    opacity: isRunning ? 1 : 0.5
+                  }}>
+                    {isResting ? <RestIcon /> : <WorkIcon />}
+                    {!isRunning ? 'Paused' : (isResting ? 'Rest' : 'Work')}
+                  </div>
+                </div>
+
+                <div style={{
+                  background: '#97BFB4',
+                  borderRadius: '20px',
+                  padding: '48px 24px',
+                  textAlign: 'center',
+                  marginBottom: '24px',
+                  opacity: isRunning ? 1 : 0.7
+                }}>
+                  <div style={{
+                    fontSize: '96px',
+                    fontWeight: '800',
+                    lineHeight: 1,
+                    fontFamily: "'Outfit', sans-serif",
+                    color: '#DD4A4B',
+                    marginBottom: '12px'
+                  }}>
+                    {timeRemaining}
+                  </div>
+                  <div style={{
+                    fontSize: '12px',
+                    fontWeight: '600',
+                    letterSpacing: '0.1em',
+                    textTransform: 'uppercase',
+                    color: '#7A2937'
+                  }}>
+                    Seconds
+                  </div>
+                </div>
+
+                <div style={{
+                  background: '#97BFB4',
+                  borderRadius: '16px',
+                  padding: '24px',
+                  marginBottom: '24px'
+                }}>
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginBottom: '16px'
+                  }}>
+                    <div>
+                      <div style={{
+                        fontSize: '11px',
+                        fontWeight: '600',
+                        color: '#7A2937',
+                        letterSpacing: '0.05em',
+                        textTransform: 'uppercase',
+                        marginBottom: '4px'
+                      }}>
+                        Exercise
+                      </div>
+                      <div style={{
+                        fontSize: '24px',
+                        fontWeight: '800',
+                        fontFamily: "'Outfit', sans-serif",
+                        color: '#7A2937'
+                      }}>
+                        {currentExercise}/{numExercises}
+                      </div>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <div style={{
+                        fontSize: '11px',
+                        fontWeight: '600',
+                        color: '#7A2937',
+                        letterSpacing: '0.05em',
+                        textTransform: 'uppercase',
+                        marginBottom: '4px'
+                      }}>
+                        Set
+                      </div>
+                      <div style={{
+                        fontSize: '24px',
+                        fontWeight: '800',
+                        fontFamily: "'Outfit', sans-serif",
+                        color: '#7A2937'
+                      }}>
+                        {currentSet}/{setsPerExercise}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style={{
+                    background: 'rgba(122, 41, 55, 0.2)',
+                    borderRadius: '50px',
+                    height: '8px',
+                    overflow: 'hidden',
+                    marginBottom: '8px'
+                  }}>
+                    <div style={{
+                      background: '#DD4A4B',
+                      height: '100%',
+                      width: `${progressPercent}%`,
+                      transition: 'width 0.5s ease',
+                      borderRadius: '50px'
+                    }}/>
+                  </div>
+                  <div style={{
+                    fontSize: '11px',
+                    fontWeight: '600',
+                    color: '#7A2937',
+                    textAlign: 'center',
+                    fontFamily: "'Outfit', sans-serif"
+                  }}>
+                    {Math.round(progressPercent)}% Complete
+                  </div>
+                </div>
+
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 1fr',
+                  gap: '12px'
+                }}>
+                  {isRunning ? (
+                    <button
+                      onClick={pauseWorkout}
+                      style={{
+                        background: 'transparent',
+                        border: '2px solid #97BFB4',
+                        borderRadius: '12px',
+                        padding: '18px',
+                        fontSize: '15px',
+                        fontWeight: '600',
+                        color: '#7A2937',
+                        cursor: 'pointer',
+                        fontFamily: "'Inter', sans-serif",
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '8px'
+                      }}
+                    >
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                        <rect x="4" y="3" width="3" height="10" rx="1" fill="currentColor"/>
+                        <rect x="9" y="3" width="3" height="10" rx="1" fill="currentColor"/>
+                      </svg>
+                      Pause
+                    </button>
+                  ) : (
+                    <button
+                      onClick={resumeWorkout}
+                      style={{
+                        background: '#DD4A4B',
+                        border: 'none',
+                        borderRadius: '12px',
+                        padding: '18px',
+                        fontSize: '15px',
+                        fontWeight: '600',
+                        color: 'white',
+                        cursor: 'pointer',
+                        fontFamily: "'Inter', sans-serif",
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '8px'
+                      }}
+                    >
+                      <PlayIcon />
+                      Resume
+                    </button>
+                  )}
+                  <button
+                    onClick={resetWorkout}
+                    style={{
+                      background: 'transparent',
+                      border: '2px solid #97BFB4',
+                      borderRadius: '12px',
+                      padding: '18px',
+                      fontSize: '15px',
+                      fontWeight: '600',
+                      color: '#7A2937',
+                      cursor: 'pointer',
+                      fontFamily: "'Inter', sans-serif",
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '8px'
+                    }}
+                  >
+                    <ResetIcon />
+                    Reset
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {isComplete && (
+              <div style={{
+                textAlign: 'center'
+              }}>
+                <div style={{
+                  fontSize: '96px',
+                  marginBottom: '24px'
+                }}>
+                  ✓
+                </div>
+                <h2 style={{
+                  fontSize: '32px',
+                  fontWeight: '800',
+                  marginBottom: '12px',
+                  color: '#97BFB4',
+                  fontFamily: "'Outfit', sans-serif"
+                }}>
+                  Workout Complete!
+                </h2>
+                <p style={{
+                  color: '#7A2937',
+                  fontSize: '15px',
+                  fontWeight: '500',
+                  marginBottom: '32px',
+                  fontFamily: "'Outfit', sans-serif",
+                  opacity: 0.7
+                }}>
+                  {numExercises} exercises • {totalSets} sets
+                </p>
+                <button
+                  onClick={resetWorkout}
+                  style={{
+                    width: '100%',
+                    background: '#DD4A4B',
+                    border: 'none',
+                    borderRadius: '12px',
+                    padding: '20px',
+                    fontSize: '17px',
+                    fontWeight: '700',
+                    color: 'white',
+                    cursor: 'pointer',
+                    letterSpacing: '0.02em',
+                    textTransform: 'uppercase',
+                    fontFamily: "'Outfit', sans-serif"
+                  }}
+                >
+                  New Workout
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    };
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<WorkoutTimer />);
+  </script>
 </body>
 </html>
